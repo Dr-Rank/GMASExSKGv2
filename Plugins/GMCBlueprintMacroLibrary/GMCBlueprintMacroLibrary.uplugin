@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "GMCv2 BlueprintMacroLibrary",
+	"Description": "Blueprint macros for GMCv2.",
+	"Category": "GRIMTEC",
+	"CreatedBy": "Dominik Lips",
+	"CreatedByURL": "https://grimtec.net",
+	"DocsURL": "https://grimtec.net/gmcv2-doc-contents",
+	"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/0a128683c41f4b59906c661b95ca8655",
+	"SupportURL": "https://discord.gg/G37j8JHkMz",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "GMC",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/0a128683c41f4b59906c661b95ca8655"
+		}
+	]
+}
