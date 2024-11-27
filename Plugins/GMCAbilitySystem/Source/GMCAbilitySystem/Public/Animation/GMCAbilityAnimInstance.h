@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GMCPawn.h"
@@ -19,7 +19,6 @@ class GMCABILITYSYSTEM_API UGMCAbilityAnimInstance : public UAnimInstance
 
 public:
 	UGMCAbilityAnimInstance(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual ~UGMCAbilityAnimInstance();
 	
 	virtual void NativeBeginPlay() override;
 	virtual void NativeInitializeAnimation() override;

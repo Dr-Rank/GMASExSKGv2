@@ -1,4 +1,4 @@
-#include "Utility/GMASUtilities.h"
+﻿#include "Utility/GMASUtilities.h"
 
 #if WITH_EDITOR
 void UGMASUtilities::SetPropertyFlagsSafe(UClass* StaticClass, FName PropertyName, EPropertyFlags NewFlags)

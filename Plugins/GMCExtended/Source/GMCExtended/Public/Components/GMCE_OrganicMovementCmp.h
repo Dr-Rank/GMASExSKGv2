@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GMCE_CoreComponent.h"
@@ -9,7 +9,7 @@
 #include "GMCE_OrganicMovementCmp.generated.h"
 
 // We append GMC to the delegate name because Epic decided to add an FOnProcessRootMotion to the CMC in 5.4.
-DECLARE_DELEGATE_RetVal_ThreeParams(FTransform, FOnProcessRootMotionGMC, const FTransform&, UGMCE_OrganicMovementCmp*, float)
+DECLARE_DELEGATE_RetVal_SixParams(FTransform, FOnProcessRootMotionGMC, const FTransform&, const FTransform&, const FTransform&, UGMCE_OrganicMovementCmp*, float, bool)
 DECLARE_DELEGATE_TwoParams(FOnSyncDataApplied, const FGMC_PawnState&, EGMC_NetContext)
 DECLARE_DELEGATE(FOnBindReplicationData)
 
@@ -84,6 +84,10 @@ public:
 	virtual float GetInputAccelerationCustom_Implementation() const override;
 	virtual void CalculateVelocity(float DeltaSeconds) override;
 
+	virtual void ApplyDirectionalInput(const FInputActionInstance& InputAction) override;
+	
+	virtual void OnLanded_Implementation(const FVector& ImpactVelocity) override;
+
 	virtual void RotateYawTowardsDirection(const FVector& Direction, float Rate, float DeltaTime) override;
 	virtual bool RotateYawTowardsDirectionSafe(const FVector& Direction, float Rate, float DeltaTime) override;
 
@@ -91,7 +95,13 @@ public:
 
 	virtual void ApplyRotation(bool bIsDirectBotMove, const FGMC_RootMotionVelocitySettings& RootMotionMetaData, float DeltaSeconds) override;
 
+	virtual void MontageUpdate(float DeltaSeconds) override;
+	virtual void OnMontageStarted(UAnimMontage* Montage, float Position, float PlayRate, bool bInterrupted, float MontageDelta, float DeltaSeconds) override;
+
 	// General functionality
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="GMCExtended|Debug")
+	FString GetComponentDescription() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement|Operation")
 	/// When true, the pawn will smoothly rotate around the yaw axis to face the current direction of movement.
@@ -125,8 +135,14 @@ public:
 	float FacingAngleOffsetThreshold { 25.f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement|Turn-in-Place")
+	/// If TurnInPlaceType is not "None" and bOrientToControllerDirection is true, the character will
+	/// remain facing the way they currently appear to be until the controller rotation deviates by at least
+	/// this much.
+	float TurnInPlaceAngleThreshold { 45.f };
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement|Turn-in-Place")
 	/// If turn in place is enabled, this determines how the turn-in-place is handled. 
-	EGMCE_TurnInPlaceType TurnInPlaceType { EGMCE_TurnInPlaceType::MovementComponent };
+	EGMCE_TurnInPlaceType TurnInPlaceType { EGMCE_TurnInPlaceType::None };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement|Turn-in-Place")
 	/// If this is a non-zero positive number and bOrientToControlRotationDirection is true, we will wait
@@ -162,18 +178,21 @@ public:
 	void UpdateTurnInPlaceState(bool bSimulated = false);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Movement")
+	bool IsStandalone() const { return GetNetMode() == NM_Standalone; }
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Movement")
 	bool IsTurningInPlace() const { return TurnInPlaceState == EGMCE_TurnInPlaceState::Running; }
 
 	UFUNCTION(BlueprintCallable, Category="Movement")
 	void SetStrafingMovement(bool bStrafingEnabled = false);
 
-	bool ShouldTurnInPlace() const;
-	void CalculateTurnInPlace(float DeltaSeconds);
-	void ApplyTurnInPlace(float DeltaSeconds, bool bSimulated);
-	void EndTurnInPlace(bool bSimulated = false);
+	virtual bool ShouldTurnInPlace() const;
+	virtual void CalculateTurnInPlace(float DeltaSeconds);
+	virtual void ApplyTurnInPlace(float DeltaSeconds, bool bSimulated);
+	virtual void EndTurnInPlace(bool bSimulated = false);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Movement")
-	float GetTurnInPlaceDuration() const;
+	virtual float GetTurnInPlaceDuration() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement|Tempo")
 	/// If this is true, then if the movement direction differs from the character's forward vector
@@ -202,9 +221,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Movement Trajectory")
 	bool IsTrajectoryDebugEnabled() const;
 
+private:
+	FString ComponentLogDescriptionString {};
+
 #pragma region Animation Support
 protected:
-	virtual void PreProcessRootMotion(const FGMC_AnimMontageInstance& MontageInstance, FRootMotionMovementParams& InOutRootMotionParams, float DeltaSeconds) override;
+	virtual void PreProcessRootMotion(const FGMC_AnimMontageInstance& MontageInstance, FRootMotionMovementParams& InOutRootMotionParams, float MontageDelta, float DeltaSeconds) override;
 	virtual void OnSyncDataApplied_Implementation(const FGMC_PawnState& State, EGMC_NetContext Context) override;
 
 	void UpdateAnimationHelperValues(float DeltaSeconds);
@@ -223,10 +245,19 @@ public:
 
 	float GetAimYawRemaining() const { return AimYawRemaining; }
 	float GetComponentYawRemaining() const { return ComponentYawRemaining; }
+
+	float GetMaxPredictionSpeed(const FVector& InputVector);
 	
 	FOnProcessRootMotionGMC ProcessRootMotionPreConvertToWorld;
 	FOnSyncDataApplied OnSyncDataAppliedDelegate;
 	FOnBindReplicationData OnBindReplicationData;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation Helpers")
+	FVector LastLandingVelocity { 0.f };
+
+	// When a montage is playing, what our previous montage position was. Used for motion warping.
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation Helpers")
+	float PreviousMontagePosition { 0.f };
 
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Animation Helpers")
@@ -260,7 +291,11 @@ protected:
 	FVector CurrentAnimationAcceleration { 0.f };
 
 	FVector LastAnimationVelocity { 0.f };
+
+	int32 BI_LastLandingVelocity { -1 };
+	int32 BI_PreviousMontagePosition { -1 };
 	
+
 #pragma endregion
 	
 	// Trajectory state functionality (input presence, acceleration synthesis for simulated proxies, etc.)
@@ -273,7 +308,7 @@ public:
 
 	/// If true, velocity differs enough from input acceleration that we're likely to pivot.
 	UFUNCTION(BlueprintPure, Category="Movement Trajectory")
-	bool DoInputAndVelocityDiffer() const { return FMath::Abs(InputVelocityOffset) > 90.f; }
+	bool DoInputAndVelocityDiffer() const { return FMath::Abs(InputVelocityOffset) > PivotPredictionAngleThreshold; }
 
 	/// The angle, in degrees, that velocity differs from provided input (on the XY plane).
 	UFUNCTION(BlueprintPure, Category="Movement Trajectory")
@@ -285,6 +320,8 @@ public:
 	FVector GetCurrentEffectiveAcceleration() const { return CalculatedEffectiveAcceleration; }
 
 private:
+
+	void UpdateAllPredictions(float DeltaTime);
 
 	void UpdateCalculatedEffectiveAcceleration();
 	
@@ -314,6 +351,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
 	void UpdatePivotPrediction(float DeltaTime);
 
+	/// Calls the starting prediction logic; the result will be cached in the TrajectoryIsStarting
+	/// property.
+	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
+	void UpdateStartPrediction(float DeltaTime);
+	
 	/// Check whether a stop is predicted, and store the prediction in OutStopPrediction. Only valid
 	/// if UpdateStopPrediction has been called, or PrecalculateDistanceMatches is true.
 	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
@@ -324,14 +366,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
 	bool IsPivotPredicted(FVector &OutPivotPrediction) const;
 
+	/// Check whether we're starting to move or not.
+	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
+	bool IsStarting() const { return bTrajectoryIsStarting; };
+	
 	/// If true, this component will pre-calculate stop and pivot predictions, so that they can be easily accessed
 	/// in a thread-safe manner without needing to manually call the calculations each time.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory|Precalculations")
 	bool bPrecalculateDistanceMatches { true };
 
 	/// The angle of difference which we must exceed before a pivot can be predicted. Must be
-	/// between 90 and 179. Recommended values are between 90 and 135.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory", meta=(UIMin="90", UIMax="179"))
+	/// between 30 and 179. Recommended values are between 90 and 135 for normal use, though lower
+	/// may be beneficial for motion matching.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory", meta=(UIMin="30", UIMax="179"))
 	float PivotPredictionAngleThreshold { 90.f };
 	
 	UFUNCTION(BlueprintPure, Category="Trajectory Matching", meta=(ToolTip="Returns a predicted point relative to the actor where they'll come to a stop.", BlueprintThreadSafe))
@@ -369,9 +416,26 @@ private:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Movement Trajectory", meta=(AllowPrivateAccess=true))
 	FVector PredictedPivotPoint { 0.f };
 
+	/// A position relative to our location where we predict a pivot. Only valid when UpdatePivotPrediction has
+	/// been called, or PrecalculateDistanceMatches is true.
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Movement Trajectory", meta=(AllowPrivateAccess=true))
+	bool bTrajectoryIsStarting { false };
+
+	double LastStoppedTimestamp { 0 };
+	bool bLastStoppedPivotCheck { false };
+	FVector LastStartVelocityCheck { 0.f };
+	
 	/// Should we start with trajectory debug enabled? Only valid in editor.
 	UPROPERTY(EditDefaultsOnly, Category="Movement Trajectory", meta=(AllowPrivateAccess=true))
 	bool bDrawDebugPredictions { false };
+
+	/// Should we draw *only* the trajectory, skipping pivot/stop markers? Only valid in editor.
+	UPROPERTY(EditDefaultsOnly, Category="Movement Trajectory", meta=(AllowPrivateAccess=true))
+	bool bDrawTrajectoryOnly { false };
+	
+	/// How long should our future predictions persist on screen for? -1 is 'one frame'. Only valid in editor.
+	UPROPERTY(EditDefaultsOnly, Category="Movement Trajectory", meta=(AllowPrivateAccess=true))
+	float DebugPredictionLifeTime { -1.f };
 	
 #if ENABLE_DRAW_DEBUG || WITH_EDITORONLY_DATA
 	/// For debug rendering
@@ -395,11 +459,14 @@ public:
 	/// Given the historical samples, predict the future trajectory a character will take. Coordinates are relative
 	/// to the origin point provided.
 	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
-	FGMCE_MovementSampleCollection PredictMovementFuture(const FTransform& FromOrigin, bool bIncludeHistory) const;
+	FGMCE_MovementSampleCollection PredictMovementFuture(const FTransform& FromOrigin, const FRotator& ControllerRotation, const FQuat& MeshOffset, bool bIncludeHistory);
 
 	/// Update the cached trajectory prediction. Called automatically if trajectory precalculation is enabled.
 	UFUNCTION(BlueprintCallable, Category="Movement Trajectory")
 	virtual void UpdateTrajectoryPrediction();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="Movement Trajectory")
+	FVector GetCurrentVelocityFromHistory();
 	
 	/// Should historical trajectory samples be taken?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory")
@@ -417,6 +484,17 @@ public:
 	/// If true, trajectory will be calculated based on the controller rotation rather than the character rotation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory")
 	bool bTrajectoryUsesControllerRotation { false };
+
+	/// If true (and trajectory is using controller rotation), acceleration direction will stop rotating when it's
+	/// a close match to the current controller rotation.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory")
+	bool bTrajectoryStopsAtControllerRotation { true };
+
+	/// This value will be used to decay rotations in trajectory prediction. This does not
+	/// apply to the acceleration rotation if you are using controller rotation and have
+	/// trajectory stops at controller rotation set to true.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Movement Trajectory")
+	float TrajectoryRotationDecay { 1.1f };
 	
 	/// The maximum size of the trajectory sample history.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
@@ -426,6 +504,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
 	float TrajectoryHistorySeconds { 2.f };
 
+	/// How long, in seconds, we should wait between samples. 0 will use a sane-but-frequent default.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
+	float TrajectoryHistoryPeriod { 0 };
+	
 	/// How many simulated samples should be generated for each second, when predicting trajectory?
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
 	int32 TrajectorySimSampleRate = { 30 };
@@ -434,6 +516,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
 	float TrajectorySimSeconds = { 1.f };
 
+	/// Whether predicted trajectory should adhere to the ground.
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement Trajectory")
+	bool bTrajectoryPredictCollisions { false };
+	
 	/// The last predicted trajectory. Only valid if PrecalculateFutureTrajectory is true, or
 	/// UpdateTrajectoryPrediction has been manually called.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Movement Trajectory")
@@ -460,9 +546,8 @@ protected:
 	void UpdateMovementSamples();
 
 	/// Get our current acceleration and rotational velocity from our historical movement samples.
-	void GetCurrentAccelerationRotationVelocityFromHistory(FVector& OutAcceleration, FRotator& OutRotationVelocity) const;
+	void GetCurrentAccelerationRotationVelocityFromHistory(FVector& OutAcceleration, FRotator& OutRotationVelocity, const EGMCE_TrajectoryRotationType& RotationType) const;
 
-	
 private:
 
 	TRingBuffer<FGMCE_MovementSample> MovementSamples;
@@ -491,6 +576,7 @@ public:
 	UFUNCTION(BlueprintPure, Category="Ragdoll")
 	bool RagdollActive() const { return bWantsRagdoll; }
 
+	UFUNCTION(BlueprintCallable, Category="Ragdoll")
 	virtual EGMC_MovementMode GetRagdollMode() const { return EGMC_MovementMode::Custom1; }
 
 	/// Can be overridden to provide a custom value for the initial linear velocity for a ragdoll. Will be called
@@ -573,6 +659,8 @@ public:
 
 	virtual void OnSolverChangedMode(FGameplayTag NewMode, FGameplayTag OldMode) {};
 
+	void LeaveSolverMode();
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Solvers")
@@ -591,6 +679,8 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Solvers")
 	FGameplayTag CurrentActiveSolverTag;
 	int32 BI_CurrentActiveSolverTag { -1 };
+
+	FGameplayTag PreviousSolverTag;
 
 	UPROPERTY()
 	TObjectPtr<UGMCE_BaseSolver> CurrentActiveSolver;

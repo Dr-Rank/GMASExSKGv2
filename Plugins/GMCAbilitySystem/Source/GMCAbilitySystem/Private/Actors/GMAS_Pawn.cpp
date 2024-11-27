@@ -1,8 +1,10 @@
-#include "Actors/GMAS_Pawn.h"
+﻿#include "Actors/GMAS_Pawn.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Utility/GMASUtilities.h"
 
 
@@ -30,12 +32,25 @@ AGMAS_Pawn::AGMAS_Pawn(const FObjectInitializer& ObjectInitializer) : Super(Obje
 	MeshComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 	MeshComponent->SetCollisionProfileName(TEXT("NoCollision"));
 	
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm"));
+	SpringArmComponent->bEditableWhenInherited = true;
+	SpringArmComponent->SetupAttachment(CapsuleComponent);
+	SpringArmComponent->TargetArmLength = 400.f;
+	SpringArmComponent->bUsePawnControlRotation = true;
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Follow Camera"));
+	CameraComponent->bEditableWhenInherited = true;
+	CameraComponent->SetupAttachment(SpringArmComponent);
+	CameraComponent->bUsePawnControlRotation = false;
+
 	// Add our basic goodies.
 	AbilitySystemComponent = CreateDefaultSubobject<UGMC_AbilitySystemComponent>(TEXT("Ability Component"));
 
 #if WITH_EDITOR
 	UGMASUtilities::SetPropertyFlagsSafe(StaticClass(), TEXT("CapsuleComponent"), CPF_DisableEditOnInstance);
 	UGMASUtilities::SetPropertyFlagsSafe(StaticClass(), TEXT("MeshComponent"), CPF_DisableEditOnInstance);
+	UGMASUtilities::SetPropertyFlagsSafe(StaticClass(), TEXT("SpringArmComponent"), CPF_DisableEditOnInstance);
+	UGMASUtilities::SetPropertyFlagsSafe(StaticClass(), TEXT("CameraComponent"), CPF_DisableEditOnInstance);
 	UGMASUtilities::SetPropertyFlagsSafe(StaticClass(), TEXT("AbilitySystemComponent"), CPF_DisableEditOnInstance);
 #endif
 }

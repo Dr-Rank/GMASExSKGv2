@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GMCE_RootMotionModifier.h"
@@ -44,6 +44,7 @@ public:
 	void OnWarpEnd(UGMCE_MotionWarpingComponent* Component, UGMCE_RootMotionModifier* Modifier) const;
 
 #if WITH_EDITOR
+	virtual FString GetNotifyName_Implementation() const override;
 	virtual void ValidateAssociatedAssets() override;
 #endif
 };

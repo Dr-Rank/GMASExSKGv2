@@ -1,4 +1,4 @@
-#include "GMCE_BaseAnimInstance.h"
+﻿#include "GMCE_BaseAnimInstance.h"
 
 #include "KismetAnimationLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -70,9 +70,8 @@ void UGMCE_BaseAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	AimYawRemaining = MovementComponent->GetAimYawRemaining();
 	ComponentYawRemaining = MovementComponent->GetComponentYawRemaining();
 	
-	const FVector InputVector = MovementComponent->GetRawInputVector();
-	InputDirection = InputVector.GetSafeNormal();
-	InputAcceleration = InputVector * MovementComponent->GetInputAcceleration();
+	InputAcceleration = MovementComponent->GetProcessedInputVector() * MovementComponent->GetInputAcceleration();
+	InputDirection = InputAcceleration.GetSafeNormal();
 
 	AimOffset = UKismetMathLibrary::NormalizedDeltaRotator(AimRotation, WorldRotation);
 

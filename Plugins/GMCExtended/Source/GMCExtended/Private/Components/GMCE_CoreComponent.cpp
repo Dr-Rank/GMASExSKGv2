@@ -1,4 +1,4 @@
-#include "Components/GMCE_CoreComponent.h"
+﻿#include "Components/GMCE_CoreComponent.h"
 
 #include "GMCExtendedLog.h"
 #include "GMCPawn.h"

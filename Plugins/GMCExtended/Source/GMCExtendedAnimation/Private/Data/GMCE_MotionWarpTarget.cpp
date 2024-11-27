@@ -1,5 +1,4 @@
-#include "GMCE_MotionWarpTarget.h"
-#include "GMCExtendedAnimation.h"
+﻿#include "GMCE_MotionWarpTarget.h"
 #include "GMCExtendedAnimationLog.h"
 
 FGMCE_MotionWarpTarget::FGMCE_MotionWarpTarget(const FName& InName, const USceneComponent* InComp, FName InBoneName,
@@ -42,6 +41,60 @@ FTransform FGMCE_MotionWarpTarget::GetTargetTransform() const
 	}
 
 	return FTransform(Rotation, Location);	
+}
+
+FTransform FGMCE_MotionWarpTarget::GetTargetTransformFromAnimation(const FTransform& Origin,
+	const FTransform& ComponentRelative, const UAnimInstance* AnimInstance, const UAnimSequenceBase* Animation, float Timestamp) const
+{
+	if (!bFollowComponent)
+	{
+		return FTransform(Rotation, Location);
+	}
+
+	const FTransform ComponentToWorld = Origin * ComponentRelative;
+	
+	if (BoneName != NAME_None)
+	{
+		return GetTargetTransformFromAnimation(AnimInstance, Animation, Timestamp, BoneName, ComponentToWorld);
+	}
+
+	return ComponentToWorld;
+}
+
+FTransform FGMCE_MotionWarpTarget::GetTargetTransformFromAnimation(const UAnimInstance* AnimInstance,
+	const UAnimSequenceBase* Animation, float Timestamp, const FName& BoneName, const FTransform& ComponentToWorld)
+{
+	const FBoneContainer& BoneContainer = AnimInstance->GetRequiredBonesOnAnyThread();
+	const int32 BoneIndex = BoneContainer.GetPoseBoneIndexForBoneName(BoneName);
+	if (BoneIndex == INDEX_NONE) return FTransform::Identity;
+	
+	TArray<FBoneIndexType> BoneIndices;
+	BoneIndices.Add(BoneIndex);
+	BoneContainer.GetReferenceSkeleton().EnsureParentsExistAndSort(BoneIndices);
+
+	FBoneContainer RequiredBones(BoneIndices, UE::Anim::FCurveFilterSettings(UE::Anim::ECurveFilterMode::DisallowAll), *BoneContainer.GetAsset());
+
+	FCompactPose FinalPose;
+	FinalPose.SetBoneContainer(&RequiredBones);
+
+	FBlendedCurve Curve;
+	Curve.InitFrom(BoneContainer);
+
+	const FAnimExtractContext Context(static_cast<double>(Timestamp), true);
+
+	UE::Anim::FStackAttributeContainer Attributes;
+	FAnimationPoseData AnimationPoseData(FinalPose, Curve, Attributes);
+	if (const UAnimSequence* AnimSequence = Cast<UAnimSequence>(Animation))
+	{
+		AnimSequence->GetBonePose(AnimationPoseData, Context);
+	}
+	else if (const UAnimMontage* AnimMontage = Cast<UAnimMontage>(Animation))
+	{
+		const FAnimTrack& AnimTrack = AnimMontage->SlotAnimTracks[0].AnimTrack;
+		AnimTrack.GetAnimationPose(AnimationPoseData, Context);
+	}	
+
+	return FinalPose.GetBones()[0] * ComponentToWorld;
 }
 
 FTransform FGMCE_MotionWarpTarget::GetTargetTransformFromComponent(const USceneComponent* Comp, const FName& BoneName)

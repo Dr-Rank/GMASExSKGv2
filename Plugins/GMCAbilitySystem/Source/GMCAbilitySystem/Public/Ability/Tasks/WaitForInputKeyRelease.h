@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "EnhancedInputComponent.h"
 #include "GMCAbilityTaskBase.h"
 #include "Ability/GMCAbility.h"

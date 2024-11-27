@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GameplayTagContainer.h"
 #include "GMCAttributeClamp.generated.h"
 

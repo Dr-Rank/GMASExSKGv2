@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/GMCAbilityComponent.h"
@@ -46,22 +46,12 @@ FDelegateHandle UGMC_AbilitySystemComponent::AddFilteredTagChangeDelegate(const 
 void UGMC_AbilitySystemComponent::RemoveFilteredTagChangeDelegate(const FGameplayTagContainer& Tags,
 	FDelegateHandle Handle)
 {
-	if (!Handle.IsValid())
-	{
-		UE_LOG(LogGMCAbilitySystem, Warning, TEXT("Passed an invalid delegate to unbind for tag changes on %s"), *Tags.ToString())
-		return;
-	}
-	
 	for (int32 Index = FilteredTagDelegates.Num() - 1; Index >= 0; --Index)
 	{
 		TPair<FGameplayTagContainer, FGameplayTagFilteredMulticastDelegate>& SearchPair = FilteredTagDelegates[Index];
 		if (SearchPair.Key == Tags)
 		{
-			if (!SearchPair.Value.Remove(Handle))
-			{
-				UE_LOG(LogGMCAbilitySystem, Warning, TEXT("Unable to unbind a tag change delegate for %s"), *Tags.ToString())
-			}
-			
+			SearchPair.Value.Remove(Handle);
 			if (!SearchPair.Value.IsBound())
 			{
 				FilteredTagDelegates.RemoveAt(Index);
@@ -208,8 +198,6 @@ void UGMC_AbilitySystemComponent::GenAncillaryTick(float DeltaTime, bool bIsComb
 
 TArray<UGMCAbilityEffect*> UGMC_AbilitySystemComponent::GetActivesEffectByTag(FGameplayTag GameplayTag) const {
 	TArray<UGMCAbilityEffect*> ActiveEffectsFound;
-
-	UE_LOG(LogGMCAbilitySystem, Error, TEXT("Searching for Active Effects with Tag: %s"), *GameplayTag.ToString());
 	
 	for (const TTuple<int, UGMCAbilityEffect*>& EffectFound : ActiveEffects) {
 		if (IsValid(EffectFound.Value) && EffectFound.Value->EffectData.EffectTag.MatchesTag(GameplayTag)) {
@@ -245,22 +233,6 @@ void UGMC_AbilitySystemComponent::RemoveAbilityMapData(UGMCAbilityMapData* Abili
 	for (const FAbilityMapData& Data : AbilityMapData->GetAbilityMapData())
 	{
 		RemoveAbilityMapData(Data);
-	}
-}
-
-void UGMC_AbilitySystemComponent::AddStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToAdd)
-{
-	for (const TSubclassOf<UGMCAbilityEffect> Effect : EffectsToAdd)
-	{
-		StartingEffects.AddUnique(Effect);
-	}
-}
-
-void UGMC_AbilitySystemComponent::RemoveStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToRemove)
-{
-	for (const TSubclassOf<UGMCAbilityEffect> Effect : EffectsToRemove)
-	{
-		StartingEffects.Remove(Effect);
 	}
 }
 
@@ -370,12 +342,6 @@ bool UGMC_AbilitySystemComponent::TryActivateAbility(const TSubclassOf<UGMCAbili
 			UE_LOG(LogGMCAbilitySystem, VeryVerbose, TEXT("Ability Activation for %s Stopped (Already Instanced)"), *GetNameSafe(ActivatedAbility));
 			return false;
 		}
-	}
-
-	// Check Activation Tags
-	if (!CheckActivationTags(AbilityCDO)){
-		UE_LOG(LogGMCAbilitySystem, Verbose, TEXT("Ability Activation for %s Stopped By Tags"), *GetNameSafe(ActivatedAbility));
-		return false;
 	}
 
 	// Check Activation Tags
@@ -645,7 +611,7 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 			if(AttributeData.bGMCBound){
 				BoundAttributes.AddAttribute(NewAttribute);
 			}
-			else if (GetOwnerRole() == ROLE_Authority || GetNetMode() == NM_Standalone) {
+			else if (GetOwnerRole() == ROLE_Authority) {
 				// FFastArraySerializer will duplicate all attributes on first replication if we
 				// add the attributes on the clients as well.
 				UnBoundAttributes.AddAttribute(NewAttribute);
@@ -666,13 +632,10 @@ void UGMC_AbilitySystemComponent::InstantiateAttributes()
 		Attribute.CalculateValue();
 	}
 
-	// We need to be non-const to ensure we can mark the item dirty.
-	for (FAttribute& Attribute : UnBoundAttributes.Items)
+	for (const FAttribute& Attribute : UnBoundAttributes.Items)
 	{
 		Attribute.CalculateValue();
-		UnBoundAttributes.MarkItemDirty(Attribute);
 	}
-	UnBoundAttributes.MarkArrayDirty();
 
 	for (const FAttribute& Attribute : OldUnBoundAttributes.Items)
 	{
@@ -778,7 +741,7 @@ void UGMC_AbilitySystemComponent::TickActiveEffects(float DeltaTime)
 	for (const TPair<int, UGMCAbilityEffect*>& Effect : ActiveEffects)
 	{
 		
-		if (!IsValid(Effect.Value)) {
+		if (!IsValid(Effect.Value) || !Effect.Value->IsValidLowLevel()) {
 			UE_LOG(LogGMCAbilitySystem, Error, TEXT("Active Effect id %d is null or pending kill, removing from the list."), Effect.Key);
 			CompletedActiveEffects.Push(Effect.Key);
 			continue;	
@@ -1514,13 +1477,8 @@ void UGMC_AbilitySystemComponent::ApplyAbilityEffectModifier(FGMCAttributeModifi
 			AttributeModifier.Value = -AttributeModifier.Value;
 		}
 		AffectedAttribute->ApplyModifier(AttributeModifier, bModifyBaseValue);
-
-		// Only broadcast a change if we've genuinely changed.
-		if (OldValue != AffectedAttribute->Value)
-		{
-			OnAttributeChanged.Broadcast(AffectedAttribute->Tag, OldValue, AffectedAttribute->Value);
-			NativeAttributeChangeDelegate.Broadcast(AffectedAttribute->Tag, OldValue, AffectedAttribute->Value);
-		}
+		
+		NativeAttributeChangeDelegate.Broadcast(AffectedAttribute->Tag, OldValue, AffectedAttribute->Value);
 
 		BoundAttributes.MarkAttributeDirty(*AffectedAttribute);
 		UnBoundAttributes.MarkAttributeDirty(*AffectedAttribute);

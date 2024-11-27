@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "GMCAbilityTaskBase.h"
 #include "WaitDelay.generated.h"
 

@@ -1,4 +1,4 @@
-#include "Properties/GameplayElementMappingDetails.h"
+﻿#include "Properties/GameplayElementMappingDetails.h"
 #include "Utility/GameplayElementMapping.h"
 #include "PropertyHandle.h"
 #include "DetailWidgetRow.h"

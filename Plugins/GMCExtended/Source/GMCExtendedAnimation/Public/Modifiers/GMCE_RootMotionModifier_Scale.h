@@ -1,4 +1,4 @@
-// Copyright 2024 Rooibot Games, LLC
+﻿// Copyright 2024 Rooibot Games, LLC
 
 #pragma once
 
@@ -21,7 +21,7 @@ public:
 
 	UGMCE_RootMotionModifier_Scale(const FObjectInitializer& ObjectInitializer);
 
-	virtual FTransform ProcessRootMotion(const FTransform& InRootMotion, float DeltaSeconds) override
+	virtual FTransform ProcessRootMotion(const FTransform& InRootMotion, const FGMCE_MotionWarpContext& WarpContext) override
 	{
 		FTransform FinalRootMotion = InRootMotion;
 		FinalRootMotion.ScaleTranslation(Scale);

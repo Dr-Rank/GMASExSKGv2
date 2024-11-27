@@ -1,4 +1,4 @@
-#include "GMCAbilitySystemEditor.h"
+﻿#include "GMCAbilitySystemEditor.h"
 #include "Properties/GameplayElementMappingDetails.h"
 
 #define LOCTEXT_NAMESPACE "FGMCAbilitySystemEditorModule"

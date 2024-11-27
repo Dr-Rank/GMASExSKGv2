@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -89,13 +89,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="GMAS|Abilities")
 	void RemoveAbilityMapData(UGMCAbilityMapData* AbilityMapData);
-
-	UFUNCTION(BlueprintCallable, Category="GMAS|Abilities")
-	void AddStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToAdd);
-
-	UFUNCTION(BlueprintCallable, Category="GMAS|Abilities")
-	void RemoveStartingEffects(TArray<TSubclassOf<UGMCAbilityEffect>> EffectsToRemove);
-
+		
 	// Add an ability to the GrantedAbilities array
 	UFUNCTION(BlueprintCallable, Category = "GMCAbilitySystem")
 	void GrantAbilityByTag(const FGameplayTag AbilityTag);

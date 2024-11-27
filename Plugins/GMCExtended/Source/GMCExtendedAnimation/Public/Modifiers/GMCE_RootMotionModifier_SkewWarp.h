@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GMCE_RootMotionModifier_Warp.h"
@@ -15,7 +15,7 @@ class GMCEXTENDEDANIMATION_API UGMCE_RootMotionModifier_SkewWarp : public UGMCE_
 public:
 	UGMCE_RootMotionModifier_SkewWarp(const FObjectInitializer& ObjectInitializer);
 
-	virtual FTransform ProcessRootMotion(const FTransform& InRootMotion, float DeltaSeconds) override;
+	virtual FTransform ProcessRootMotion(const FTransform& InRootMotion, const FGMCE_MotionWarpContext& WarpContext) override;
 
 	static FVector WarpTranslation(const FTransform& CurrentTransform, const FVector& DeltaTranslation, const FVector& TotalTranslation, const FVector& TargetLocation);
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -108,14 +108,6 @@ struct FGMCAbilityEffectData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer GrantedTags;
 
-	// Tags that the owner must have to apply this effect
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	FGameplayTagContainer ApplicationMustHaveTags;
-
-	// Tags that the owner must not have to apply this effect
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
-	FGameplayTagContainer ApplicationMustNotHaveTags;
-
 	// Tags that the owner must have to apply and maintain this effect
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer MustHaveTags;
@@ -172,9 +164,9 @@ public:
 	FGMCAbilityEffectData EffectData;
 
 	UFUNCTION(BlueprintCallable, Category = "GMCAbilitySystem")
-	virtual void InitializeEffect(FGMCAbilityEffectData InitializationData);
+	void InitializeEffect(FGMCAbilityEffectData InitializationData);
 	
-	virtual void EndEffect();
+	void EndEffect();
 
 	virtual void BeginDestroy() override;
 	
@@ -200,7 +192,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, meta=(DisplayName="Dynamic Condition"), Category="GMCAbilitySystem")
 	bool AttributeDynamicCondition() const;
 	
-	virtual void PeriodTick();
+	void PeriodTick();
 	
 	void UpdateState(EGMASEffectState State, bool Force=false);
 
@@ -219,6 +211,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "GMCAbilitySystem")
 	UGMC_AbilitySystemComponent* OwnerAbilityComponent;
 
+private:
+	bool bHasStarted;
+
+	// Used for calculating when to tick Period effects
+	float PrevPeriodMod = 0;
+	
+	void CheckState();
+
 	// Tags
 	void AddTagsToOwner();
 
@@ -235,15 +235,10 @@ protected:
 	bool DuplicateEffectAlreadyApplied();
 
 	// Apply the things that should happen as soon as an effect starts. Tags, instant effects, etc.
-	virtual void StartEffect();
+	void StartEffect();
 
-	bool bHasStarted;
-
-private:
-	// Used for calculating when to tick Period effects
-	float PrevPeriodMod = 0;
 	
-	void CheckState();
+	
 
 public:
 	FString ToString() {

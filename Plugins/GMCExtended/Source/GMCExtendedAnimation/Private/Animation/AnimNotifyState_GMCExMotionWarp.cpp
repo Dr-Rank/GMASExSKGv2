@@ -1,4 +1,4 @@
-#include "Animation/AnimNotifyState_GMCExMotionWarp.h"
+﻿#include "Animation/AnimNotifyState_GMCExMotionWarp.h"
 #include "GMCE_MotionWarpingComponent.h"
 #include "GMCE_RootMotionModifier_Warp.h"
 #if WITH_EDITOR
@@ -64,6 +64,26 @@ void UAnimNotifyState_GMCExMotionWarp::OnRootMotionModifierDeactivate(UGMCE_Moti
 }
 
 #if WITH_EDITOR
+FString UAnimNotifyState_GMCExMotionWarp::GetNotifyName_Implementation() const
+{
+	if (!RootMotionModifier)
+	{
+		return FString(TEXT("GMCEx Motion Warping"));
+	}
+
+	FString ReturnValue = RootMotionModifier->GetClass()->GetName();
+
+	FString ModifierText = RootMotionModifier->DisplayString();
+
+	if (!ModifierText.IsEmpty())
+	{
+		ReturnValue += TEXT(": ");
+		ReturnValue.Append(ModifierText);
+	}
+
+	return ReturnValue;
+}
+
 void UAnimNotifyState_GMCExMotionWarp::ValidateAssociatedAssets()
 {
 	static const FName NAME_AssetCheck("AssetCheck");
@@ -105,7 +125,6 @@ void UAnimNotifyState_GMCExMotionWarp::ValidateAssociatedAssets()
 				AssetCheckLog.Notify(MessageLooping, EMessageSeverity::Warning, true);
 			}
 		}
-	}
-	
+	}	
 }
 #endif

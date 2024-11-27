@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
@@ -60,8 +60,6 @@ public:
 
 	// Must be called to actually start using this instance.
 	void Initialize(UObject* Owner, UGMC_AbilitySystemComponent* AbilitySystemComponent);
-	void Unregister();
-	void Reset();
 
 	void ApplyCurrentTags();
 	void ApplyCurrentAttributes();
@@ -78,6 +76,8 @@ protected:
 	bool SetValueForMappedProperty(FProperty* Property, float PropValue);
 	bool SetValueForMappedProperty(FProperty* Property, FGameplayTagContainer& MatchedTags);
 	
+	void Unregister();
+
 	void GameplayTagChangedCallback(const FGameplayTagContainer& AddedTags, const FGameplayTagContainer& RemovedTags);
 
 	void GameplayAttributeChangedCallback(const FGameplayTag& AttributeTag, const float OldValue, const float NewValue);
