@@ -34,11 +34,7 @@
     {
       "Name": "AnimationLocomotionLibrary",
       "Enabled": true
-    },
-    {
-      "Name": "VisualStudioTools",
-      "Enabled": true
-    }
+    }, 
   ],
   "TargetPlatforms": [],
   "AdditionalRootDirectories": [],
