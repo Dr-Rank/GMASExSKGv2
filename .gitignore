@@ -8,7 +8,7 @@ Saved/
 Plugins/GMC
 
 # Don't check in the experimental motion matching samples until we're ready.
-Plugins/GMCE_Motion
+# Plugins/GMCE_Motion
 
 # IDE artifacts
 .idea/
@@ -32,4 +32,4 @@ debug.log
 
 # MacOS debris
 .DS_Store
-Content/Characters
+# Content/Characters
