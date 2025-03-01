@@ -1,4 +1,4 @@
-﻿#include "GMCE_MotionWarpTarget.h"
+#include "GMCE_MotionWarpTarget.h"
 #include "GMCExtendedAnimationLog.h"
 
 FGMCE_MotionWarpTarget::FGMCE_MotionWarpTarget(const FName& InName, const USceneComponent* InComp, FName InBoneName,

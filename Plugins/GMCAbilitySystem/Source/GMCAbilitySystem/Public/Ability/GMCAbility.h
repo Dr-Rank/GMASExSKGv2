@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "GameplayTagContainer.h"
 #include "GMCAbilityData.h"
 #include "GMCAbilitySystem.h"

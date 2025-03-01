@@ -1,4 +1,4 @@
-﻿using UnrealBuildTool;
+using UnrealBuildTool;
 using System.IO;
 
 public class GMCExtendedAnimation : ModuleRules

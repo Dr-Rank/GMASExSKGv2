@@ -1,4 +1,4 @@
-﻿#include "Modifiers/GMCE_RootMotionModifier_SkewWarp.h"
+#include "Modifiers/GMCE_RootMotionModifier_SkewWarp.h"
 
 #include "GMCExtendedAnimationLog.h"
 #include "GMCE_MotionWarpingComponent.h"

@@ -1,43 +1,39 @@
 {
-  "FileVersion": 3,
-  "EngineAssociation": "5.4",
-  "Category": "",
-  "Description": "",
-  "Modules": [
-    {
-      "Name": "GMASExSKG",
-      "Type": "Runtime",
-      "LoadingPhase": "Default"
-    }
-  ],
-  "Plugins": [
-    {
-      "Name": "ModelingToolsEditorMode",
-      "Enabled": true
-    },
-    {
-      "Name": "GMC",
-      "Enabled": true
-    },
-    {
-      "Name": "AnimationWarping",
-      "Enabled": true
-    },
-    {
-      "Name": "SKGShooterFramework",
-      "Enabled": true
-    },
-    {
-      "Name": "MotionWarping",
-      "Enabled": true
-    },
-    {
-      "Name": "AnimationLocomotionLibrary",
-      "Enabled": true
-    }, 
-  ],
-  "TargetPlatforms": [],
-  "AdditionalRootDirectories": [],
-  "AdditionalPluginDirectories": [],
-  "EpicSampleNameHash": ""
+	"FileVersion": 3,
+	"EngineAssociation": "5.5",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "GMASExSKG",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "GMC",
+			"Enabled": true
+		},
+		{
+			"Name": "AnimationWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "Chooser",
+			"Enabled": true
+		},
+		{
+			"Name": "SKGShooterFramework",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/4986d4f5b73148deb154e1cd31dd9623"
+		}
+	]
 }

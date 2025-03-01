@@ -31,4 +31,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components", DisplayName="Skeletal Mesh", meta=(AllowPrivateAccess=true))
 	TObjectPtr<USkeletalMeshComponent> MeshComponent;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components", DisplayName="Spring Arm", meta=(AllowPrivateAccess=true))
+	TObjectPtr<USpringArmComponent> SpringArmComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Components", DisplayName="Follow Camera", meta=(AllowPrivateAccess=true))
+	TObjectPtr<UCameraComponent> CameraComponent;
+
 };

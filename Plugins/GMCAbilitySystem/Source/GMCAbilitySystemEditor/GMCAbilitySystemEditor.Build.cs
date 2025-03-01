@@ -1,4 +1,4 @@
-﻿using UnrealBuildTool;
+using UnrealBuildTool;
 
 public class GMCAbilitySystemEditor : ModuleRules
 {

@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/SetTargetDataGameplayTag.h"
+#include "Ability/Tasks/SetTargetDataGameplayTag.h"
 #include "GMCAbilityComponent.h"
 
 UGMCAbilityTask_SetTargetDataGameplayTag* UGMCAbilityTask_SetTargetDataGameplayTag::SetTargetDataGameplayTag(UGMCAbility* OwningAbility, FGameplayTag InTag){
@@ -26,8 +26,6 @@ void UGMCAbilityTask_SetTargetDataGameplayTag::ProgressTask(FInstancedStruct& Ta
 }
 
 void UGMCAbilityTask_SetTargetDataGameplayTag::ClientProgressTask(){
-	Super::ClientProgressTask();
-
 	FGMCAbilityTaskTargetDataGameplayTag TaskData;
 	TaskData.TaskType = EGMCAbilityTaskDataType::Progress;
 	TaskData.AbilityID = Ability->GetAbilityID();

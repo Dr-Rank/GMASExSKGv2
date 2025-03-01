@@ -1,4 +1,4 @@
-﻿#include "Actors/GMAS_Pawn.h"
+#include "Actors/GMAS_Pawn.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"

@@ -1,4 +1,4 @@
-﻿#include "Animation/GMCAbilityAnimInstance.h"
+#include "Animation/GMCAbilityAnimInstance.h"
 #include "GMCAbilityComponent.h"
 #include "Utility/GMASUtilities.h"
 
@@ -9,6 +9,11 @@ UGMCAbilityAnimInstance::UGMCAbilityAnimInstance(const FObjectInitializer& Objec
 	UGMASUtilities::ClearPropertyFlagsSafe(StaticClass(), TEXT("GMCPawn"), CPF_SimpleDisplay | CPF_Edit);
 	UGMASUtilities::ClearPropertyFlagsSafe(StaticClass(), TEXT("AbilitySystemComponent"), CPF_SimpleDisplay | CPF_Edit);
 #endif
+}
+
+UGMCAbilityAnimInstance::~UGMCAbilityAnimInstance()
+{
+ 	TagPropertyMap.Reset();
 }
 
 void UGMCAbilityAnimInstance::NativeInitializeAnimation()

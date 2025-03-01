@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "UObject/FieldPath.h"
 #include "IPropertyTypeCustomization.h"

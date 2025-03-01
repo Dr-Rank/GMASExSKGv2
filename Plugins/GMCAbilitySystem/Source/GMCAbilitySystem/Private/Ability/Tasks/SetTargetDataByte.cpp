@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/SetTargetDataByte.h"
+#include "Ability/Tasks/SetTargetDataByte.h"
 
 #include "GMCAbilityComponent.h"
 

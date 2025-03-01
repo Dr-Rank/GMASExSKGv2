@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/WaitForInputKeyPress.h"
+#include "Ability/Tasks/WaitForInputKeyPress.h"
 
 #include "EnhancedInputComponent.h"
 #include "Components/GMCAbilityComponent.h"
@@ -24,11 +24,14 @@ void UGMCAbilityTask_WaitForInputKeyPress::Activate()
 	{
 		UEnhancedInputComponent* const InputComponent = GetEnhancedInputComponent();
 
-		const FEnhancedInputActionEventBinding& Binding = InputComponent->BindAction(
-			Ability->AbilityInputAction, ETriggerEvent::Started, this,
-			&UGMCAbilityTask_WaitForInputKeyPress::OnKeyPressed);
+		if (InputComponent)
+		{
+			const FEnhancedInputActionEventBinding& Binding = InputComponent->BindAction(
+				Ability->AbilityInputAction, ETriggerEvent::Started, this,
+				&UGMCAbilityTask_WaitForInputKeyPress::OnKeyPressed);
 		
-		InputBindingHandle = Binding.GetHandle();
+			InputBindingHandle = Binding.GetHandle();			
+		}
 	}
 	else
 	{

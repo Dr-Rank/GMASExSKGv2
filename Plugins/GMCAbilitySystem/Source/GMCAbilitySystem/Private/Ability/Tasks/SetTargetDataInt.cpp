@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/SetTargetDataInt.h"
+#include "Ability/Tasks/SetTargetDataInt.h"
 
 #include "GMCAbilityComponent.h"
 

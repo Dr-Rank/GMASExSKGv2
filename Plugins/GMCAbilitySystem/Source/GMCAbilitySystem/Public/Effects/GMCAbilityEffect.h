@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -107,6 +107,19 @@ struct FGMCAbilityEffectData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
 	FGameplayTagContainer GrantedTags;
+
+	// Whether to preserve the granted tags if multiple instances of the same effect are applied
+	// If false, will remove all stacks of the tag
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	bool bPreserveGrantedTagsIfMultiple = false;
+
+	// Tags that the owner must have to apply this effect
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FGameplayTagContainer ApplicationMustHaveTags;
+
+	// Tags that the owner must not have to apply this effect
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")
+	FGameplayTagContainer ApplicationMustNotHaveTags;
 
 	// Tags that the owner must have to apply and maintain this effect
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GMCAbilitySystem")

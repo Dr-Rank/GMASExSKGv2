@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/WaitDelay.h"
+#include "Ability/Tasks/WaitDelay.h"
 #include "Components/GMCAbilityComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -36,6 +36,9 @@ void UGMCAbilityTask_WaitDelay::Tick(float DeltaTime)
 
 void UGMCAbilityTask_WaitDelay::OnTimeFinish()
 {
-	Completed.Broadcast();
-	EndTask();
+	if (GetState() != EGameplayTaskState::Finished)
+	{
+		Completed.Broadcast();
+		EndTask();
+	}
 }

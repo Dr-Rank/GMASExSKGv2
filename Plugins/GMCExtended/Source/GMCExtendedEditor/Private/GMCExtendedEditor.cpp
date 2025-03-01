@@ -1,4 +1,4 @@
-﻿#include "GMCExtendedEditor.h"
+#include "GMCExtendedEditor.h"
 
 #define LOCTEXT_NAMESPACE "FGMCExtendedEditorModule"
 

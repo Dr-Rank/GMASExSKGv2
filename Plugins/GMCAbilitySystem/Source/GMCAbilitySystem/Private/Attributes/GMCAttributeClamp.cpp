@@ -1,4 +1,4 @@
-﻿#include "Attributes/GMCAttributeClamp.h"
+#include "Attributes/GMCAttributeClamp.h"
 
 #include "GMCAbilityComponent.h"
 

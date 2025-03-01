@@ -1,4 +1,4 @@
-﻿#include "Components/GMCE_OrganicMovementCmp.h"
+#include "Components/GMCE_OrganicMovementCmp.h"
 #include "GMCExtendedLog.h"
 #include "GMCE_TrackedCurveProvider.h"
 #include "GMCPawn.h"
@@ -426,10 +426,10 @@ void UGMCE_OrganicMovementCmp::PreMovementUpdate_Implementation(float DeltaSecon
 	RunSolvers(DeltaSeconds);	
 }
 
-void UGMCE_OrganicMovementCmp::PreSimulatedMoveExecution_Implementation(const FGMC_PawnState& InputState,
-	bool bCumulativeUpdate, float DeltaTime, double Timestamp)
+void UGMCE_OrganicMovementCmp::PreSimulatedMoveExecution_Implementation(FGMC_PawnState& InputState,
+	bool bCumulativeUpdate, bool bRollback, float DeltaTime, double Timestamp)
 {
-	Super::PreSimulatedMoveExecution_Implementation(InputState, bCumulativeUpdate, DeltaTime, Timestamp);
+	Super::PreSimulatedMoveExecution_Implementation(InputState, bCumulativeUpdate, bRollback, DeltaTime, Timestamp);
 }
 
 void UGMCE_OrganicMovementCmp::MovementUpdate_Implementation(float DeltaSeconds)
@@ -1809,7 +1809,14 @@ void UGMCE_OrganicMovementCmp::RunSolvers(float DeltaTime)
 	
 	for (const auto& Solver : Solvers)
 	{
-		Solver->RunSolver(State, DeltaTime);
+		if (Solver->RunSolver(State, DeltaTime))
+		{
+			FGameplayTag SolverTag = Solver->GetTag();
+			if (SolverTag != FGameplayTag::EmptyTag && !State.AvailableSolvers.HasTag(SolverTag))
+			{
+				State.AvailableSolvers.AddTag(SolverTag);
+			}
+		}
 	}
 
 	AvailableSolvers = State.AvailableSolvers;	

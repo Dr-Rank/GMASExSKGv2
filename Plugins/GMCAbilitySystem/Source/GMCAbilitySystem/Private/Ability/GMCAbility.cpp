@@ -1,4 +1,4 @@
-﻿#include "Ability/GMCAbility.h"
+#include "Ability/GMCAbility.h"
 #include "GMCAbilitySystem.h"
 #include "GMCPawn.h"
 #include "Ability/Tasks/GMCAbilityTaskBase.h"
@@ -6,13 +6,29 @@
 
 UWorld* UGMCAbility::GetWorld() const
 {
+	if (HasAllFlags(RF_ClassDefaultObject))
+	{
+		// If we're a CDO, we *must* return nullptr to avoid causing issues with
+		// UObject::ImplementsGetWorld(), which just blithely and blindly calls GetWorld().
+		return nullptr;
+	}
+	
 #if WITH_EDITOR
 	if (GIsEditor)
 	{
 		return GWorld;
 	}
 #endif // WITH_EDITOR
-	return GEngine->GetWorldContexts()[0].World();
+
+	// Sanity check rather than blindly accessing the world context array.
+	auto Contexts = GEngine->GetWorldContexts();
+	if (Contexts.Num() == 0)
+	{
+		UE_LOG(LogGMCAbilitySystem, Error, TEXT("%s: instanciated class with no valid world!"), *GetClass()->GetName())
+		return nullptr;
+	}
+	
+	return Contexts[0].World();
 }
 
 void UGMCAbility::Tick(float DeltaTime)
@@ -43,23 +59,26 @@ void UGMCAbility::AncillaryTick(float DeltaTime){
 
 void UGMCAbility::TickTasks(float DeltaTime)
 {
-	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
+	for (int i=0; i < RunningTasks.Num(); i++)
 	{
-		if (Task.Value == nullptr) {continue;}
-		Task.Value->Tick(DeltaTime);
+		UGMCAbilityTaskBase* Task = RunningTasks[i];
+		if (Task == nullptr) {continue;}
+		Task->Tick(DeltaTime);
 	}
 }
 
 void UGMCAbility::AncillaryTickTasks(float DeltaTime){
-	for (const TPair<int, UGMCAbilityTaskBase* >& Task : RunningTasks)
+	for (int i=0; i < RunningTasks.Num(); i++)
 	{
-		if (Task.Value == nullptr) {continue;}
-		Task.Value->AncillaryTick(DeltaTime);
+		UGMCAbilityTaskBase* Task = RunningTasks[i];
+		if (Task == nullptr) {continue;}
+		Task->AncillaryTick(DeltaTime);
 	}
 }
 
 void UGMCAbility::Execute(UGMC_AbilitySystemComponent* InAbilityComponent, int InAbilityID, const UInputAction* InputAction)
 {
+	// TODO : Add input action tag here to avoid going by the old FGMCAbilityData struct
 	this->AbilityInputAction = InputAction;
 	this->AbilityID = InAbilityID;
 	this->OwnerAbilityComponent = InAbilityComponent;
@@ -220,7 +239,6 @@ bool UGMCAbility::IsOnCooldown() const
 {
 	return OwnerAbilityComponent->GetCooldownForAbility(AbilityTag) > 0;
 }
-
 
 
 bool UGMCAbility::PreExecuteCheckEvent_Implementation() {

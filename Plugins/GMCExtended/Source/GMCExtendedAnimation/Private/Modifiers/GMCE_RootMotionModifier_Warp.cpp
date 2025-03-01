@@ -1,4 +1,4 @@
-﻿// Copyright 2024 Rooibot Games, LLC
+// Copyright 2024 Rooibot Games, LLC
 
 
 #include "GMCE_RootMotionModifier_Warp.h"

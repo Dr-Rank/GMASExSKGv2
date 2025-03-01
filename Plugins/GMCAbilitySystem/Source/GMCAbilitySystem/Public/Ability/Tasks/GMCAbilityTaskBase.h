@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "InstancedStruct.h"
 #include "Ability/GMCAbility.h"
 #include "Ability/Tasks/GMCAbilityTaskData.h"

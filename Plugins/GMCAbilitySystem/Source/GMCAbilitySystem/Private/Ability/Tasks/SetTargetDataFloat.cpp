@@ -1,4 +1,4 @@
-﻿#include "Ability/Tasks/SetTargetDataFloat.h"
+#include "Ability/Tasks/SetTargetDataFloat.h"
 
 #include "GMCAbilityComponent.h"
 
