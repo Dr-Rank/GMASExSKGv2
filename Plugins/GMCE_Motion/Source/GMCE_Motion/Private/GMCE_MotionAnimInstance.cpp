@@ -125,7 +125,7 @@ void UGMCE_MotionAnimInstance::NativeUpdateAnimation(float DeltaTime)
 			FutureFacing = FQuat::Identity;
 			FutureGroundSpeed = 0.f;
 			bIsStarting = false;
-			Trajectory = FPoseSearchQueryTrajectory();
+			Trajectory = FTransformTrajectory();
 			bIsPivoting_MotionMatch = false;
 			bIsStopping_MotionMatch = false;
 		}

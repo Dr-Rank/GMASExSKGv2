@@ -78,7 +78,7 @@ protected:
 	
 	/// A precalculated trajectory, suitable for passing into the Motion Match node without further change.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Motion Matching")
-	FPoseSearchQueryTrajectory Trajectory;
+	FTransformTrajectory Trajectory;
 
 	/// A precalculated near-future velocity.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Movement)
