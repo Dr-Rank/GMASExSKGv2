@@ -1,4 +1,4 @@
-#include "Interfaces/GMCE_MotionWarpSubject.h"
+﻿#include "Interfaces/GMCE_MotionWarpSubject.h"
 
 
 // Add default functionality here for any IGMCE_MotionWarpSubject functions that are not pure virtual.

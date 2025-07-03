@@ -1,4 +1,4 @@
-// Copyright 2024 Rooibot Games, LLC
+﻿// Copyright 2024 Rooibot Games, LLC
 
 
 #include "Solvers/GMCE_BaseSolver.h"
